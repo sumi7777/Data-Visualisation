@@ -2,13 +2,14 @@
  * Created by Administrator on 1/2/2017.
  */
 $(document).ready(function () {
-    d3.csv("./data/import-season.csv", function (error, data) {
+    d3.csv("./data/trade.csv", function (error, data) {
         if (error) {
             console.log(error);
         }
         else {
             data.forEach(function (d) {
-                d.Imports = parseFloat(d.Imports);
+                d.importPrice = parseFloat(d.importPrice);
+                console.log(d.importPrice);
             });
             dataset = data;
             barChart(dataset);
@@ -31,7 +32,7 @@ function barChart(dataset) {
     //
     //Define key function
     var key = function (d) {
-        return d.time
+        return d.date
     };
 
 
@@ -42,7 +43,7 @@ function barChart(dataset) {
 
     //Create svg element
     var chart = d3.select("#bar");
-    var margin = {top: 120, right: 50, bottom: 80, left: 50},//改图的大小
+    var margin = {top: 120, right: 50, bottom: 100, left: 50},//改图的大小
         width = +chart.attr("width") - margin.left - margin.right,
         height = +chart.attr("height") - margin.top - margin.bottom,
         svg = chart.append("g").attr("transform",
@@ -50,19 +51,19 @@ function barChart(dataset) {
 
       //Scale function for axes and radius
     var yScale = d3.scale.linear()
-        .domain([0, d3.max(dataset, function (d) {
-            return d.Imports;
+        .domain([86, d3.max(dataset, function (d) {
+            return d.importPrice;
         })])
         .range([height, 0]);
 
     var xScale = d3.scale.ordinal()
         .domain(dataset.map(function (d) {
-            return d.time;
+            return d.date;
         }))
         .rangeRoundBands([0, width], .5);
 
     //Create y axis
-    var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(4);
+    var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(5);
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
     //Create barchart
@@ -73,14 +74,14 @@ function barChart(dataset) {
         .attr("class", "negative")
         .attr({
             x: function (d) {
-                return xScale(d.time);
+                return xScale(d.date);
             },
             y: function (d) {
-                return yScale(d.Imports);
+                return yScale(d.importPrice);
             },
             width: xScale.rangeBand(),
             height: function (d) {
-                return height - yScale(d.Imports);
+                return height - yScale(d.importPrice);
             }
         })
 
@@ -93,10 +94,10 @@ function barChart(dataset) {
                 .style("opacity", 1)
                 .style("left", (d3.event.pageX + 10) + "px")
                 .style("top", (d3.event.pageY - 30) + "px")
-                .text(d.time);
+                .text(d.date);
 
 
-            info.append("p").text(d.Imports);
+            info.append("p").text(d.importPrice);
 
         })
         .on('mouseout', function (d) {
@@ -120,12 +121,11 @@ function barChart(dataset) {
             .attr("x", -10)
             .attr("dy", "2.5em")
             .attr("dx", ".90em")
-            .style("text-anchor", "end")
-            .text("£ billion");
+            .style("text-anchor", "end");
 
     svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", "translate(0,300)")
+        .attr("transform", "translate(0,280)")
         .call(xAxis)
         .selectAll("text")
         .attr("transform", "rotate(-60)")
